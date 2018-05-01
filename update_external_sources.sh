@@ -78,8 +78,48 @@ function build_moltenvk () {
     -scheme "MoltenVK (Release)" build
 }
 
+function create_clang() {
+  echo "Creating local llvm/clang repository (${BASEDIR}/llvm)."
+  mkdir -p "${BASEDIR}/llvm"
+  pushd "${BASEDIR}/llvm"
+
+  echo "Checking out llvm..."
+  if [ -d llvm ]; then
+    cd llvm
+    svn cleanup
+    svn update --quiet
+  else
+    svn co --quiet http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_600/final/ llvm
+    cd llvm
+  fi
+
+  echo "Checking out llvm/tools/clang..."
+  cd tools
+  if [ -d clang ]; then
+    cd clang
+    svn cleanup
+    svn update --quiet
+  else
+    svn co --quiet http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_600/final/ clang
+  fi
+
+  popd
+}
+
+function build_clang() {
+  echo "Building ${BASEDIR}/llvm/clang"
+  pushd "${BASEDIR}/llvm"
+  mkdir -p build
+  cd build
+  cmake ../llvm -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install
+  make -j $CORE_COUNT
+  make install
+  popd
+}
+
 INCLUDE_GLSLANG=false
 INCLUDE_MOLTENVK=false
+INCLUDE_CLANG=false
 NO_SYNC=false
 NO_BUILD=false
 USE_IMPLICIT_COMPONENT_LIST=true
@@ -107,6 +147,11 @@ do
       # options to specify build of spirv-tools components
       -s|--spirv-tools)
       echo "($option) is deprecated and is no longer necessary"
+      ;;
+      # options to specify build of clang for libclangTooling
+      --clang)
+      INCLUDE_CLANG=true
+      echo "Building clang ($option)"
       ;;
       # option to specify skipping sync from git
       --no-sync)
@@ -172,3 +217,9 @@ if [ ${INCLUDE_MOLTENVK} == "true" ]; then
   fi
 fi
 
+if [ ${INCLUDE_CLANG} == "true" ]; then
+  create_clang
+  if [ ${NO_BUILD} == "false" ]; then
+    build_clang
+  fi
+fi
