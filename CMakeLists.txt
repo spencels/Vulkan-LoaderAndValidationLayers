@@ -79,6 +79,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(INSTALL_LVL_FILES "Install content from LoaderAndValidationLayers repo" ON)
 endif()
 
+find_package(ClangTooling REQUIRED)
+
 set(SCRIPTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
 # Header file for CMake settings
@@ -162,6 +164,7 @@ endif()
 option(BUILD_ICD "Build icd" ON)
 option(CUSTOM_GLSLANG_BIN_ROOT "Use the user defined GLSLANG_BINARY_ROOT" OFF)
 option(CUSTOM_SPIRV_TOOLS_BIN_ROOT "Use the user defined SPIRV_TOOLS*BINARY_ROOT paths" OFF)
+option(BUILD_TOOLS "Build tools" OFF)
 
 #Choose natural default paths for glslang and SPIRV-Tools binaries to support custom definition by the user on the CMake command line or in the GUI
 set(GLSLANG_BINARY_ROOT "${CMAKE_BINARY_DIR}/../glslang" CACHE STRING "User defined path to the glslang binaries for this project")
@@ -447,6 +450,10 @@ add_definitions(-DAPI_NAME="${API_NAME}")
 # tests: VULKAN tests
 if(BUILD_LOADER)
     add_subdirectory(loader)
+endif()
+
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
 endif()
 
 if(BUILD_TESTS)

@@ -163,3 +163,7 @@ SET(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 add_subdirectory(${GTEST_RELATIVE_LOCATION} ${CMAKE_CURRENT_BINARY_DIR}/../submodules/googletest)
 
 add_subdirectory(layers)
+
+if (BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
