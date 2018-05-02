@@ -79,7 +79,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     option(INSTALL_LVL_FILES "Install content from LoaderAndValidationLayers repo" ON)
 endif()
 
-find_package(ClangTooling REQUIRED)
+find_package(Clang REQUIRED)
 
 set(SCRIPTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 
