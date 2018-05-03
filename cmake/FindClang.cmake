@@ -1,8 +1,9 @@
 # Find Clang libtooling development headers and library.
 # Exports: 
-# Clang_INCLUDE_DIRS
-# Clang_LIB_DIRS
-# Clang_LIBRARIES
+# clang - clang CMake library.
+# Clang_INCLUDE_DIRS - Include directory path.
+# Clang_LIB_DIRS - Library directory.
+# Clang_LIBRARIES - Library names (full paths).
 
 macro (find_and_add_clang_library _libname)
     find_library(Clang_${_libname}_LIB
@@ -60,6 +61,6 @@ if (NOT Clang_FOUND)
     return()
 endif()
 
-add_library(clang INTERFACE IMPORTED)
-set_property(TARGET clang PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Clang_INCLUDE_DIRS})
+add_library(clang INTERFACE)
+target_include_directories(clang INTERFACE ${Clang_INCLUDE_DIRS})
 target_link_libraries(clang INTERFACE llvm ${Clang_LIBRARIES})

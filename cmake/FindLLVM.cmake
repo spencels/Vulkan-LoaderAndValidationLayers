@@ -5,13 +5,13 @@
 # LLVM_LIBRARIES
 # LLVM_CONFIG_PROGRAM
 
-find_package(zlib REQUIRED)
+find_package(ZLIB REQUIRED)
 if (NOT ZLIB_FOUND)
     set(LLVM_FOUND OFF)
     return()
 endif()
 
-find_package(curses REQUIRED)
+find_package(Curses REQUIRED)
 if (NOT CURSES_FOUND)
     set(LLVM_FOUND OFF)
     return()
@@ -78,6 +78,7 @@ if (NOT LLVM_FOUND)
     return()
 endif()
 
-add_library(llvm INTERFACE IMPORTED)
-set_property(TARGET llvm PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${LLVM_INCLUDE_DIRS})
+add_library(llvm INTERFACE)
+target_include_directories(llvm INTERFACE ${LLVM_INCLUDE_DIRS})
 target_link_libraries(llvm INTERFACE ${LLVM_LIBRARIES} ${ZLIB_LIBRARIES} ${CURSES_LIBRARIES})
+
