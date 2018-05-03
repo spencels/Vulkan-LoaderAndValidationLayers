@@ -1,16 +1,15 @@
 #ifndef CHECK_ERROR_CODES_H_
 #define CHECK_ERROR_CODES_H_
 
-#include "clang/Tooling/Refactoring/RefactoringAction.h"
-#include "clang/Tooling/Refactoring/RefactoringActionRules.h"
+#include <clang/Tooling/Refactoring/RefactoringAction.h>
+#include <clang/Tooling/Refactoring/RefactoringActionRules.h>
 #include <clang/Tooling/Tooling.h>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
 
 // Split string into chunks by delimiter.
-std::vector<std::string> SplitString(const std::string_view str, const std::string_view delimiter);
+std::vector<std::string> SplitString(const std::string& str, const std::string& delimiter);
 
 
 class ValidationDatabaseEntry {

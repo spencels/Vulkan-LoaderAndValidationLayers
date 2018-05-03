@@ -1,13 +1,11 @@
 #include "check_error_codes.h"
 
-#include "clang/Tooling/Refactoring/RefactoringAction.h"
-#include "clang/Tooling/Refactoring/RefactoringActionRules.h"
+#include <clang/Tooling/Refactoring/RefactoringAction.h>
+#include <clang/Tooling/Refactoring/RefactoringActionRules.h>
 #include <clang/Tooling/Tooling.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <string_view>
-#include <string_view>
 #include <vector>
 #include <unordered_map>
 
@@ -16,19 +14,22 @@ using namespace clang::tooling;
 
 
 // Split string into chunks by delimiter.
-vector<string> SplitString(const string_view str, const string_view delimiter) {
+vector<string> SplitString(const string& str, const string& delimiter) {
   vector<string> parts;
-  auto input = str;
-  while (true) {
-    auto delimiter_start = input.find_first_of(delimiter);
-    if (delimiter_start == string_view::npos) break;
 
-    parts.push_back(string(input.data(), delimiter_start));
-    const auto next_start = delimiter_start + delimiter.size();
-    input = input.substr(next_start, input.size() - next_start);
+  auto input = str.c_str();
+  size_t length = str.size();
+  while (true) {
+    auto delimiter_start = strnstr(input, delimiter.c_str(), length);
+    if (delimiter_start == nullptr) break;
+
+    parts.push_back(string(input, delimiter_start - input));
+    const auto difference = delimiter_start - input + delimiter.size();
+    length -= difference;
+    input += difference;
   }
 
-  parts.push_back(string(input));
+  parts.push_back(string(input, length));
 
   return parts;
 }
@@ -41,10 +42,11 @@ unordered_map<string, ValidationDatabaseEntry> LoadValidationDatabase(const char
   ifstream file(path);
 
   string line;
+  const string delimiter("~^~");
   while (getline(file, line)) {
     if (line[0] == '#') continue;
 
-    auto pieces = SplitString(line, "~^~");
+    auto pieces = SplitString(line, delimiter);
     ValidationDatabaseEntry entry(pieces[0], pieces[1] == "Y", pieces[6]);
     database.insert({pieces[6], entry});
   }

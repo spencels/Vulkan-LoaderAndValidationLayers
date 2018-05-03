@@ -4,8 +4,6 @@
 # Clang_LIB_DIRS
 # Clang_LIBRARIES
 
-find_package(LLVM REQUIRED)
-
 macro (find_and_add_clang_library _libname)
     find_library(Clang_${_libname}_LIB
         NAMES ${_libname}
@@ -24,10 +22,9 @@ macro (find_and_add_clang_library _libname)
         )
 endmacro()
 
-# Copy duplicate info from LLVM config.
+find_package(LLVM REQUIRED)
 set(Clang_INCLUDE_DIRS ${LLVM_INCLUDE_DIR})
 set(Clang_LIB_DIRS ${LLVM_LIB_DIR})
-set(Clang_LIBRARIES ${LLVM_LIBRARIES})
 
 # Version 5+ required.
 execute_process(
@@ -58,3 +55,11 @@ find_and_add_clang_library(clangBasic)
 find_package(PackageHandleStandardArgs REQUIRED)
 find_package_handle_standard_args(Clang
     DEFAULT_MSG Clang_INCLUDE_DIRS Clang_LIB_DIRS Clang_LIBRARIES)
+
+if (NOT Clang_FOUND)
+    return()
+endif()
+
+add_library(clang INTERFACE IMPORTED)
+set_property(TARGET clang PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Clang_INCLUDE_DIRS})
+target_link_libraries(clang INTERFACE llvm ${Clang_LIBRARIES})
