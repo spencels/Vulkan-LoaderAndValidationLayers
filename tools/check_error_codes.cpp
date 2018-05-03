@@ -20,8 +20,8 @@ vector<string> SplitString(const string& str, const string& delimiter) {
   auto input = str.c_str();
   size_t length = str.size();
   while (true) {
-    auto delimiter_start = strnstr(input, delimiter.c_str(), length);
-    if (delimiter_start == nullptr) break;
+    auto delimiter_start = strstr(input, delimiter.c_str());
+    if (!delimiter_start) break;
 
     parts.push_back(string(input, delimiter_start - input));
     const auto difference = delimiter_start - input + delimiter.size();
