@@ -18,8 +18,9 @@ macro (find_and_add_clang_library _libname)
         set(Clang_FOUND OFF)
         return()
     endif ()
-    list(APPEND Clang_LIBRARIES
-        ${Clang_${_libname}_LIB}
+
+    # Clang libs must be linked before LLVM because they depend on LLVM.
+    list(APPEND Clang_LIBRARIES ${Clang_${_libname}_LIB}
         )
 endmacro()
 
@@ -42,17 +43,17 @@ if (LLVM_VERSION VERSION_LESS "5")
 endif()
 
 # Add clang libraries.
-find_and_add_clang_library(clangAST)
-find_and_add_clang_library(clangAnalysis)
-find_and_add_clang_library(clangBasic)
-find_and_add_clang_library(clangDriver)
-find_and_add_clang_library(clangEdit)
 find_and_add_clang_library(clangFrontend)
-find_and_add_clang_library(clangLex)
+find_and_add_clang_library(clangTooling)
+find_and_add_clang_library(clangDriver)
+find_and_add_clang_library(clangSerialization)
 find_and_add_clang_library(clangParse)
 find_and_add_clang_library(clangSema)
-find_and_add_clang_library(clangSerialization)
-find_and_add_clang_library(clangTooling)
+find_and_add_clang_library(clangAnalysis)
+find_and_add_clang_library(clangEdit)
+find_and_add_clang_library(clangAST)
+find_and_add_clang_library(clangLex)
+find_and_add_clang_library(clangBasic)
 
 find_package(PackageHandleStandardArgs REQUIRED)
 find_package_handle_standard_args(Clang
