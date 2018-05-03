@@ -10,15 +10,12 @@ if (NOT ZLIB_FOUND)
     set(LLVM_FOUND OFF)
     return()
 endif()
-set(LLVM_LIBRARIES ${ZLIB_LIBRARIES})
 
 find_package(curses REQUIRED)
 if (NOT CURSES_FOUND)
     set(LLVM_FOUND OFF)
     return()
 endif()
-
-list(APPEND LLVM_LIBRARIES ${CURSES_LIBRARIES})
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/external/llvm)
   message(STATUS "Using Clang build in ${CMAKE_SOURCE_DIR}/external/build-llvm.")
@@ -48,14 +45,14 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 execute_process(
-    COMMAND ${LLVM_CONFIG} --libdir
+    COMMAND ${LLVM_CONFIG_PROGRAM} --libdir
     OUTPUT_VARIABLE LLVM_LIB_DIR
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 set(ClangTooling_INCLUDE_DIRS ${LLVM_INCLUDE_DIR})
 
 execute_process(
-    COMMAND ${LLVM_CONFIG} --libs
+    COMMAND ${LLVM_CONFIG_PROGRAM} --libs
     OUTPUT_VARIABLE LLVM_LIB_NAMES
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -76,3 +73,11 @@ find_package_handle_standard_args(LLVM
     LLVM_LIBRARIES
     LLVM_CONFIG_PROGRAM
     )
+
+if (NOT LLVM_FOUND)
+    return()
+endif()
+
+add_library(llvm INTERFACE IMPORTED)
+set_property(TARGET llvm PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${LLVM_INCLUDE_DIRS})
+target_link_libraries(llvm INTERFACE ${LLVM_LIBRARIES} ${ZLIB_LIBRARIES} ${CURSES_LIBRARIES})
