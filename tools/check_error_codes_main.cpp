@@ -1,10 +1,10 @@
-#include "check_error_codes.h"
 
-#include "clang/Tooling/CommonOptionsParser.h"
+#include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <iostream>
-#include <string>
 #include <vector>
+
+#include "check_error_codes.h"
 
 using namespace std;
 using namespace clang::tooling;
