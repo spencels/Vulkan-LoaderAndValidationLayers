@@ -2,6 +2,11 @@ if (NOT Clang_FOUND)
     message(FATAL_ERROR "Clang libtooling is required to build tools.")
 endif ()
 
+# LLVM and Clang headers won't build without warnings on Windows.
+if (WIN32)
+    set(CXX_COMPILER_FLAGS $<$<CXX_COMPILER_ID:MSVC>:/W3> ${CXX_COMPILER_FLAGS})
+endif()
+
 # Separate code into a lib so it's testable.
 add_library(check_error_codes_lib STATIC check_error_codes.cpp)
 target_link_libraries(check_error_codes_lib clang)

@@ -1,6 +1,7 @@
 @echo off
 REM Update source for glslang
 
+
 REM Determine the appropriate CMake strings for the current version of Visual Studio
 echo Determining VS version
 python .\scripts\determine_vs_version.py > vsversion.tmp
@@ -16,6 +17,7 @@ set BUILD_DIR=%~dp0
 set BASE_DIR="%BUILD_DIR%external"
 set REVISION_DIR="%BUILD_DIR%external_revisions"
 set GLSLANG_DIR=%BASE_DIR%\glslang
+set LLVM_DIR=%BASE_DIR%\llvm
 set do_32=0
 set do_64=0
 set do_debug=0
@@ -117,6 +119,14 @@ REM // ======== Parameter parsing ======== //
          goto:parameterLoop
       )
 
+      if "%1" == "--clang" (
+         set arg-do-clang=1
+         set arg-use-implicit-component-list=0
+         echo Building clang ^(%1^)
+         shift
+         goto:parameterLoop
+      )
+
       echo.
       echo Unrecognized option "%1"
       echo.
@@ -165,6 +175,13 @@ REM // ======== Parameter parsing ======== //
       if %arg-no-build% equ 0 (
          set check-glslang-build-dependencies=1
          set build-glslang=1
+      )
+   )
+
+   if %arg-do-clang% equ 1 (
+      set create-clang=1
+      if %arg-no-build% equ 0 (
+         set build-clang=1
       )
    )
 
@@ -273,6 +290,16 @@ if %sync-glslang% equ 1 (
 
 if %build-glslang% equ 1 (
    call:build_glslang
+   if %errorCode% neq 0 (goto:error)
+)
+
+if %create-clang% equ 1 (
+   call:create_clang
+   if %errorCode% neq 0 (goto:error)
+)
+
+if %build-clang% equ 1 (
+   call:build_clang
    if %errorCode% neq 0 (goto:error)
 )
 
@@ -395,5 +422,61 @@ goto:eof
       )
       cd ..
    )
+
+goto:eof
+
+:create_clang
+  echo Creating local llvm/clang repository (%LLVM_DIR%).
+  mkdir %LLVM_DIR%
+  pushd %LLVM_DIR%
+
+  echo Checking out llvm...
+  if exist llvm (
+    REM Clean up directory in case install failed last attempt.
+    cd llvm
+    svn cleanup
+    svn update --quiet
+  ) else (
+    svn co --quiet http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_600/final/ llvm
+    cd llvm
+  )
+
+  echo Checking out llvm/tools/clang...
+  cd tools
+  if exist clang (
+    cd clang
+    svn cleanup
+    svn update --quiet
+  ) else (
+    svn co --quiet http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_600/final/ clang
+  )
+  popd
+  
+goto:eof
+
+:build_clang
+  echo Building llvm/clang.
+  pushd %LLVM_DIR%
+  mkdir build
+  cd build
+
+  if %do_64% equ 1 (
+    echo Generating targets for 64-bit Visual Studio %VS_VERSION%.
+    set platform=x64
+    set generator="Visual Studio %VS_VERSION% Win64"
+  ) else (
+    echo Generating targets for 32-bit Visual Studio %VS_VERSION%.
+    set platform=x86
+    set generator="Visual Studio %VS_VERSION%"
+  )
+  if %do_debug% equ 1 (
+    set build-type=Debug
+  ) else (
+    set build-type=Release
+  )
+
+  cmake ../llvm -G %generator% -DCMAKE_INSTALL_PREFIX=install
+  msbuild INSTALL.vcxproj /p:Platform=%platform% /p:Configuration=%build-type% /verbosity:quiet /m:%NUMBER_OF_PROCESSORS% /p:BuildInParallel=true
+  popd
 
 goto:eof

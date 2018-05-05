@@ -1,11 +1,14 @@
 #ifndef CHECK_ERROR_CODES_H_
 #define CHECK_ERROR_CODES_H_
 
+#include <unordered_map>
+#include <vector>
+
+#pragma warning(push, 0)
 #include <clang/Tooling/Refactoring/RefactoringAction.h>
 #include <clang/Tooling/Refactoring/RefactoringActionRules.h>
 #include <clang/Tooling/Tooling.h>
-#include <unordered_map>
-#include <vector>
+#pragma warning(pop)
 
 
 // Split string into chunks by delimiter.

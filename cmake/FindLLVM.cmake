@@ -5,17 +5,17 @@
 # LLVM_LIBRARIES
 # LLVM_CONFIG_PROGRAM
 
-find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
-    set(LLVM_FOUND OFF)
-    return()
-endif()
+#find_package(ZLIB REQUIRED)
+#if (NOT ZLIB_FOUND)
+#    set(LLVM_FOUND OFF)
+#    return()
+#endif()
 
-find_package(Curses REQUIRED)
-if (NOT CURSES_FOUND)
-    set(LLVM_FOUND OFF)
-    return()
-endif()
+#find_package(Curses REQUIRED)
+#if (NOT CURSES_FOUND)
+#    set(LLVM_FOUND OFF)
+#    return()
+#endif()
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/external/llvm)
   message(STATUS "Using Clang build in ${CMAKE_SOURCE_DIR}/external/build-llvm.")
@@ -56,10 +56,15 @@ execute_process(
     OUTPUT_VARIABLE LLVM_LIB_NAMES
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-string(REGEX REPLACE
-    "-l(LLVM[a-zA-Z0-9]+)"
-    "${LLVM_LIB_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}\\1${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    LLVM_LIB_PATHS ${LLVM_LIB_NAMES})
+
+if (WIN32)
+    set(LLVM_LIB_PATHS ${LLVM_LIB_NAMES})
+else()
+    string(REGEX REPLACE
+        "-l(LLVM[a-zA-Z0-9]+)"
+        "${LLVM_LIB_DIR}\\\\${CMAKE_STATIC_LIBRARY_PREFIX}\\1${CMAKE_STATIC_LIBRARY_SUFFIX}"
+        LLVM_LIB_PATHS ${LLVM_LIB_NAMES})
+endif()
 string(REPLACE " " ";" LLVM_LIB_PATHS ${LLVM_LIB_PATHS})
 foreach (LIB ${LLVM_LIB_PATHS})
     list(APPEND LLVM_LIBRARIES "${LIB}")

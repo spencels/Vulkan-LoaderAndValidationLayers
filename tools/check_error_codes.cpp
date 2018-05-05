@@ -1,8 +1,10 @@
 #include "check_error_codes.h"
 
+#pragma warning(push, 0)
 #include <clang/Tooling/Refactoring/RefactoringAction.h>
 #include <clang/Tooling/Refactoring/RefactoringActionRules.h>
 #include <clang/Tooling/Tooling.h>
+#pragma warning(pop)
 #include <fstream>
 #include <iostream>
 #include <string>
