@@ -35,3 +35,5 @@ build-android/external
 *.includes
 .vscode/
 .DS_Store
+.vs/
+CMakeSettings.json

@@ -1,14 +1,10 @@
-#ifndef CHECK_ERROR_CODES_H_
-#define CHECK_ERROR_CODES_H_
+#ifndef TOOLS_CHECK_ERROR_CODES_H_
+#define TOOLS_CHECK_ERROR_CODES_H_
 
 #include <unordered_map>
 #include <vector>
 
-#pragma warning(push, 0)
-#include <clang/Tooling/Refactoring/RefactoringAction.h>
-#include <clang/Tooling/Refactoring/RefactoringActionRules.h>
-#include <clang/Tooling/Tooling.h>
-#pragma warning(pop)
+#include "clang_headers.h"
 
 
 // Split string into chunks by delimiter.
@@ -30,16 +26,16 @@ class ValidationDatabaseEntry {
 std::unordered_map<std::string, ValidationDatabaseEntry> LoadValidationDatabase(const char* path);
 
 
-class ReplaceErrorStringsAction : public clang::tooling::RefactoringAction {
- public:
-  llvm::StringRef getCommand() const override {
-    return "replace-error-strings";
-  }
+//class ReplaceErrorStringsAction : public clang::tooling::RefactoringAction {
+// public:
+//  llvm::StringRef getCommand() const override {
+//    return "replace-error-strings";
+//  }
+//
+//  llvm::StringRef getDescription() const override {
+//    return "Replaces hard-coded error strings with the appropriate error code enum.";
+//  }
+//
+//};
 
-  llvm::StringRef getDescription() const override {
-    return "Replaces hard-coded error strings with the appropriate error code enum.";
-  }
-
-};
-
-#endif // CHECK_ERROR_CODES_H_
+#endif // TOOLS_CHECK_ERROR_CODES_H_

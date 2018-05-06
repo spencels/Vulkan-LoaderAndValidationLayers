@@ -16,7 +16,8 @@ target_link_libraries(tools_tests
 
 if (WIN32)
     # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
-    FILE(TO_NATIVE_PATH ${PROJECT_BINARY_DIR}/submodules/googletest/googletest/$<CONFIGURATION> SRC_PATH)
+    FILE(TO_NATIVE_PATH ${CMAKE_BINARY_DIR}/submodules/googletest/googletest/$<CONFIGURATION>/*.dll SRC_PATH)
+    FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION> DST_GTEST_DLLS)
     add_custom_command(TARGET tools_tests POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC_PATH} $<TARGET_FILE_DIR:tools_tests>)
+        COMMAND xcopy /Y /I ${SRC_PATH} ${DST_GTEST_DLLS})
 endif()

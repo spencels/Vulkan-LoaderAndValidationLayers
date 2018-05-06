@@ -464,19 +464,32 @@ goto:eof
     echo Generating targets for 64-bit Visual Studio %VS_VERSION%.
     set platform=x64
     set generator="Visual Studio %VS_VERSION% Win64"
-  ) else (
+    if %do_debug% equ 1 (
+      set build-type=Debug
+      call:build_clang_sub
+    ) else (
+      set build-type=Release
+      call:build_clang_sub
+    )
+  )
+  if %do_32% equ 1 (
     echo Generating targets for 32-bit Visual Studio %VS_VERSION%.
     set platform=x86
     set generator="Visual Studio %VS_VERSION%"
-  )
-  if %do_debug% equ 1 (
-    set build-type=Debug
-  ) else (
-    set build-type=Release
+    if %do_debug% equ 1 (
+      set build-type=Debug
+      call:build_clang_sub
+    ) else (
+      set build-type=Release
+      call:build_clang_sub
+    )
   )
 
-  cmake ../llvm -G %generator% -DCMAKE_INSTALL_PREFIX=install
-  msbuild INSTALL.vcxproj /p:Platform=%platform% /p:Configuration=%build-type% /verbosity:quiet /m:%NUMBER_OF_PROCESSORS% /p:BuildInParallel=true
   popd
+goto:eof
 
+
+:build_clang_sub
+  cmake ../llvm -G %generator% -DCMAKE_INSTALL_PREFIX=install -Thost=%platform%
+  msbuild INSTALL.vcxproj /p:Platform=%platform% /p:Configuration=%build-type% /verbosity:quiet /m:%NUMBER_OF_PROCESSORS% /p:BuildInParallel=true
 goto:eof

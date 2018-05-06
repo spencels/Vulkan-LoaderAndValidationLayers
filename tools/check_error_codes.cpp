@@ -1,23 +1,19 @@
 #include "check_error_codes.h"
 
-#pragma warning(push, 0)
-#include <clang/Tooling/Refactoring/RefactoringAction.h>
-#include <clang/Tooling/Refactoring/RefactoringActionRules.h>
-#include <clang/Tooling/Tooling.h>
-#pragma warning(pop)
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
 
-using namespace std;
-using namespace clang::tooling;
+#include "clang_headers.h"
+
+//namespace tooling = clang::tooling;
 
 
-// Split string into chunks by delimiter.
-vector<string> SplitString(const string& str, const string& delimiter) {
-  vector<string> parts;
+// Split std::string into chunks by delimiter.
+std::vector<std::string> SplitString(const std::string& str, const std::string& delimiter) {
+  std::vector<std::string> parts;
 
   auto input = str.c_str();
   size_t length = str.size();
@@ -25,27 +21,27 @@ vector<string> SplitString(const string& str, const string& delimiter) {
     auto delimiter_start = strstr(input, delimiter.c_str());
     if (!delimiter_start) break;
 
-    parts.push_back(string(input, delimiter_start - input));
+    parts.push_back(std::string(input, delimiter_start - input));
     const auto difference = delimiter_start - input + delimiter.size();
     length -= difference;
     input += difference;
   }
 
-  parts.push_back(string(input, length));
+  parts.push_back(std::string(input, length));
 
   return parts;
 }
 
 
 // Loads relevant information from the validation database.
-unordered_map<string, ValidationDatabaseEntry> LoadValidationDatabase(const char* path) {
-  unordered_map<string, ValidationDatabaseEntry> database;
+std::unordered_map<std::string, ValidationDatabaseEntry> LoadValidationDatabase(const char* path) {
+  std::unordered_map<std::string, ValidationDatabaseEntry> database;
 
-  ifstream file(path);
+  std::ifstream file(path);
 
-  string line;
-  const string delimiter("~^~");
-  while (getline(file, line)) {
+  std::string line;
+  const std::string delimiter("~^~");
+  while (std::getline(file, line)) {
     if (line[0] == '#') continue;
 
     auto pieces = SplitString(line, delimiter);
@@ -55,6 +51,3 @@ unordered_map<string, ValidationDatabaseEntry> LoadValidationDatabase(const char
 
   return database;
 }
-
-class ReplaceErrorStringsRule : public SourceChangeRefactoringRule {
-};
