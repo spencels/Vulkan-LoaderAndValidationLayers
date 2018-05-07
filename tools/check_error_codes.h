@@ -7,10 +7,6 @@
 #include "clang_headers.h"
 
 
-// Split string into chunks by delimiter.
-std::vector<std::string> SplitString(const std::string& str, const std::string& delimiter);
-
-
 class ValidationDatabaseEntry {
  public:
   std::string name;
@@ -22,20 +18,33 @@ class ValidationDatabaseEntry {
 };
 
 
+typedef std::unordered_map<std::string, ValidationDatabaseEntry> ErrorCodeMap;
+
+
+class ErrorMessage {
+public:
+  uint32_t lineNumber;
+  std::string message;
+
+  ErrorMessage(uint32_t l, std::string m) : lineNumber(l), message(std::move(m)) {}
+};
+
+
+class ToolResults {
+public:
+  std::vector<ErrorMessage> errorMessages;
+  clang::tooling::AtomicChanges changes;
+};
+
+
+
 // Loads relevant information from the validation database.
-std::unordered_map<std::string, ValidationDatabaseEntry> LoadValidationDatabase(const char* path);
+ErrorCodeMap LoadValidationDatabase(const char* path);
 
 
-//class ReplaceErrorStringsAction : public clang::tooling::RefactoringAction {
-// public:
-//  llvm::StringRef getCommand() const override {
-//    return "replace-error-strings";
-//  }
-//
-//  llvm::StringRef getDescription() const override {
-//    return "Replaces hard-coded error strings with the appropriate error code enum.";
-//  }
-//
-//};
+// Creates clang action factory for action that replaces validation layer error strings with error IDs/enums.
+std::unique_ptr<clang::tooling::FrontendActionFactory>
+NewReplaceErrorStringsActionFactory(ErrorCodeMap *map, ToolResults *results);
+
 
 #endif // TOOLS_CHECK_ERROR_CODES_H_

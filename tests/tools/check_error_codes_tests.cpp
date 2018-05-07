@@ -3,20 +3,66 @@
 
 #include "check_error_codes.h"
 
+namespace tooling = clang::tooling;
 
-TEST(SplitString, EmptyPart) {
-  auto parts = SplitString("1,,,,2", ",,");
-  EXPECT_EQ(3, parts.size());
-  EXPECT_EQ("1", parts[0]);
-  EXPECT_EQ("", parts[1]);
-  EXPECT_EQ("2", parts[2]);
+
+class ReplaceErrorStringsTest : public testing::Test {
+protected:
+  ErrorCodeMap map;
+  ToolResults results;
+  tooling::AtomicChanges expectedChanges;
+
+  bool Process(const char *code) {
+    std::string fullCode = R"(
+      #include <cstdint>
+      class ErrorMonitor {
+       public:
+        void SetDesiredFailureMessage(uint32_t flags, const char *const myString) {}
+      };
+      ErrorMonitor *m_errorMonitor;
+      void ContainerFunction() {
+    )";
+    fullCode += code;
+    fullCode += "}";
+
+    auto factory = NewReplaceErrorStringsActionFactory(&map, &results);
+    return tooling::runToolOnCode(factory->create(), fullCode.c_str());
+  }
+
+  void AddDatabaseEntry(const char *name, bool tested, const char *message) {
+    map.emplace(std::make_pair(name, ValidationDatabaseEntry { name, tested, message }));
+  }
+
+};
+
+
+TEST_F(ReplaceErrorStringsTest, ErrorMessageMatchesDatabase) {
+  AddDatabaseEntry("ERROR_CODE", false, "Error message.");
+  char *code = R"(
+    m_errorMonitor->SetDesiredFailureMessage(1, "Error message.");
+  )";
+  ASSERT_TRUE(Process(code));
+
+  ASSERT_EQ(results.changes.size(), 1);
+  ASSERT_EQ(results.changes[0].getReplacements().size(), 1);
+  auto replacement = *results.changes[0].getReplacements().begin();
+  ASSERT_EQ(replacement.toString(), "");
 }
 
 
-TEST(SplitString, MultiPartTest) {
-  auto parts = SplitString("1,,2,,3", ",,");
-  EXPECT_EQ(3, parts.size());
-  EXPECT_EQ("1", parts[0]);
-  EXPECT_EQ("2", parts[1]);
-  EXPECT_EQ("3", parts[2]);
+TEST_F(ReplaceErrorStringsTest, ConcatenatedStrings) {
+  AddDatabaseEntry("ERROR_CODE", false, "Error message.");
+  char *code = R"(
+    m_errorMonitor->SetDesiredFailureMessage(1, "Error " "message.");
+  )";
+  EXPECT_TRUE(Process(code));
+}
+
+
+TEST_F(ReplaceErrorStringsTest, UnknownErrorMessage) {
+  AddDatabaseEntry("ERROR_CODE", false, "Error message.");
+  char *code = R"(
+    m_errorMonitor->SetDesiredFailureMessage(1, "Unknown.");
+  )";
+  EXPECT_TRUE(Process(code));
 }

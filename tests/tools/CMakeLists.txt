@@ -12,7 +12,10 @@ target_link_libraries(tools_tests
     gtest
     gtest_main
     check_error_codes_lib
+    clang
     )
+# Disable warning 4996, which pops up when including Clang headers regardless of whether "#pragma warn(push, 0)" is used.
+target_compile_options(tools_tests PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/wd4996>")
 
 if (WIN32)
     # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
