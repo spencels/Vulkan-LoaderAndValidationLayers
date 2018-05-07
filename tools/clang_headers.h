@@ -12,6 +12,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendAction.h>
+#include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 #include <clang/Tooling/Refactoring/AtomicChange.h>
 #include <llvm/ADT/SmallVector.h>
