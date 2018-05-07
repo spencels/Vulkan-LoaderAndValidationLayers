@@ -30,7 +30,7 @@ protected:
   }
 
   void AddDatabaseEntry(const char *name, bool tested, const char *message) {
-    map.emplace(std::make_pair(name, ValidationDatabaseEntry { name, tested, message }));
+    map.emplace(std::make_pair(message, ValidationDatabaseEntry { name, tested, message }));
   }
 
 };
@@ -46,7 +46,7 @@ TEST_F(ReplaceErrorStringsTest, ErrorMessageMatchesDatabase) {
   ASSERT_EQ(results.changes.size(), 1);
   ASSERT_EQ(results.changes[0].getReplacements().size(), 1);
   auto replacement = *results.changes[0].getReplacements().begin();
-  ASSERT_EQ(replacement.toString(), "");
+  ASSERT_EQ(replacement.toString(), "input.cc: 284:+0:\"ERROR_CODE\"");
 }
 
 
@@ -55,7 +55,12 @@ TEST_F(ReplaceErrorStringsTest, ConcatenatedStrings) {
   char *code = R"(
     m_errorMonitor->SetDesiredFailureMessage(1, "Error " "message.");
   )";
-  EXPECT_TRUE(Process(code));
+  ASSERT_TRUE(Process(code));
+
+  ASSERT_EQ(results.changes.size(), 1);
+  ASSERT_EQ(results.changes[0].getReplacements().size(), 1);
+  auto replacement = *results.changes[0].getReplacements().begin();
+  EXPECT_EQ(replacement.toString(), "input.cc: 284:+9:\"ERROR_CODE\"");
 }
 
 
@@ -65,4 +70,8 @@ TEST_F(ReplaceErrorStringsTest, UnknownErrorMessage) {
     m_errorMonitor->SetDesiredFailureMessage(1, "Unknown.");
   )";
   EXPECT_TRUE(Process(code));
+
+  ASSERT_EQ(results.errorMessages.size(), 1);
+  EXPECT_EQ(results.errorMessages[0].lineNumber, 10);
+  EXPECT_EQ(results.errorMessages[0].message, "Hard-coded error string does not correspond to one in the database.");
 }
